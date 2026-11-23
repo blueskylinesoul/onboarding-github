@@ -22,33 +22,50 @@ description: >-
 ## 執行原則（必須遵守）
 1. **未經同意不先執行**：凡是 AI 自行提出、但使用者尚未明確同意的「預設做法」或待決選項
    （例如選定作者資訊、覆蓋既有資料夾），一律先詢問並等待回覆。只有需求中明確、無歧義的部分可以直接做。
-2. **本 repo 是 Public**：不可寫入任何個人資訊（帳號名稱、email、個人路徑、token）。範例一律用 `<帳號>` 等佔位字。
+2. **本 repo 是 Public**：不可寫入任何個人資訊（email、個人路徑、token）。範例一律用 `<帳號>` 等佔位字；
+   唯一例外是 `bootstrap.*` 的預設下載來源（`<帳號>/onboarding-github`），這本來就是公開網址的一部分。
    本 repo 的 commit 作者 email 必須是 GitHub noreply email（見步驟 4），不可用個人 email。
 3. 已完成的步驟（例如 `git --version`、`gh auth status` 正常）直接略過。
 
 ## 執行流程
 
-整體順序：**0 取得本技能 → 1 判斷 OS → 2 安裝 git → 3 安裝 gh 並登入 → 4 git 作者 → 5 建立資料夾
+整體順序：**0 取得本技能（bootstrap）→ 1 判斷 OS → 2 安裝 git → 3 安裝 gh 並登入 → 4 git 作者 → 5 建立資料夾
 → 6 取回兩個 onboarding 技能 → 7 驗證並交棒**。
 
-### 步驟 0. 取得本技能（全新電腦，由使用者手動執行）
+### 步驟 0. 取得本技能（全新電腦，由使用者貼上一行指令）
 
-全新電腦上還沒有 git，所以用系統內建的 `curl` + `tar` 下載 Public repo 的壓縮檔
-（macOS 內建；Windows 10 1803 以後內建 `curl.exe` 與 `tar.exe`）：
+全新電腦上還沒有 git，也還沒有 AI CLI。在終端機貼上一行即可（只用系統內建的 `curl` + `tar`，不需要登入）：
 ```bash
-# macOS
+# macOS（Terminal）
+curl -fsSL https://raw.githubusercontent.com/<帳號>/onboarding-github/main/bootstrap.sh | bash
+```
+```powershell
+# Windows（PowerShell）
+irm https://raw.githubusercontent.com/<帳號>/onboarding-github/main/bootstrap.ps1 | iex
+```
+bootstrap 腳本會：
+1. 下載本技能到 `~/Downloads/onboarding-github`（Windows：`%USERPROFILE%\Downloads\onboarding-github`）。
+2. Windows 另外檢查 Git for Windows（Claude Code 在 Windows 需要 Git Bash），沒有就詢問後用 winget 安裝。
+3. 檢查 Claude Code，沒有就詢問後用官方安裝腳本安裝（`https://claude.ai/install.sh` / `install.ps1`）。
+4. 詢問後啟動 Claude Code，請它讀取下載位置的 `SKILL.md` 並從步驟 1 開始執行。
+
+每個安裝動作都會先詢問（預設 No）。下載位置已是 git repo 時會拒絕覆蓋。
+環境變數 `ONBOARDING_DEST` 可改下載位置，`ONBOARDING_REPO` 可改下載來源（`<帳號>/<repo>`）。
+
+**手動方式**（不想執行 bootstrap 時）：
+```bash
 mkdir -p ~/Downloads/onboarding-github && cd ~/Downloads/onboarding-github
 curl -fsSL https://github.com/<帳號>/onboarding-github/archive/refs/heads/main.tar.gz | tar xz --strip-components=1
 ```
 ```powershell
-# Windows（PowerShell）
 New-Item -ItemType Directory -Force "$env:USERPROFILE\Downloads\onboarding-github" | Out-Null
 Set-Location "$env:USERPROFILE\Downloads\onboarding-github"
 curl.exe -fsSL -o main.tar.gz https://github.com/<帳號>/onboarding-github/archive/refs/heads/main.tar.gz
 tar.exe xzf main.tar.gz --strip-components=1; Remove-Item main.tar.gz
 ```
-接著在 AI CLI（例如 Claude Code）中請 AI：「讀取 `~/Downloads/onboarding-github/SKILL.md` 並照著執行」。
-下文的 `<本技能目錄>` 指的就是這個暫存位置；步驟 6 會把正式版本放進 `AI_Workspace`。
+接著在 AI CLI 中請 AI：「讀取 `~/Downloads/onboarding-github/SKILL.md` 並照著執行」。
+
+下文的 `<本技能目錄>` 指的就是這個下載位置；步驟 6 會把正式版本放進 `AI_Workspace`。
 
 ### 步驟 1. 判斷作業系統
 - macOS（`uname` 為 `Darwin`）→ 以下使用 macOS 的做法與 `.sh` 腳本。
