@@ -1,0 +1,12 @@
+# macOS / Windows
+.DS_Store
+Thumbs.db
+desktop.ini
+# Secrets
+.env
+.env.*
+*.key
+*.pem
+# Backups / logs
+*.bak.*
+*.log
